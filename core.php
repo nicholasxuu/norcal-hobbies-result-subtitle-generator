@@ -264,7 +264,9 @@ function cmp_curr_time($a, $b) {
 
 function cmp_pos($a, $b) {
 	//echo var_dump($a);
-	if ($a["position"] != $b["position"]) {
+	if ($a["lap_i"] != $b["lap_i"]) {
+		return $a["lap_i"] < $b["lap_i"];
+	} else if ($a["position"] != $b["position"]) {
 		return $a["position"] > $b["position"];
 	} else {
 		if ($a['finish'] && !$b['finish']) {
@@ -409,12 +411,16 @@ function get_all_live_info_ass($total_data, $race_name, $init_time, $race_mins, 
 
 		$sub_string = "";//subtitle string
 		
+		$sub_string_0 = "";
+		
+		$blink_diff = isset($total_curr_time[$i+1]) ? $total_curr_time[$i+1]["curr_time"] - $total_curr_time[$i]["curr_time"] : 0.1;
 		$start_time = get_time($init_time + $curr_data["curr_time"]);
+		$mid_time = get_time($init_time + $curr_data["curr_time"] + min(0.1, $blink_diff)); // for time change user blink off
 		$end_time = (isset($total_curr_time[$i+1])) ? get_time($init_time + $total_curr_time[$i+1]["curr_time"]) : "";
 		
-		//echo var_dump($curr_data["curr_time"]);
+		echo var_dump($curr_data);
 		$curr_time_data = get_all_dri_lap_i_curr_time($curr_data["curr_time"], $total_data, $race_name);
-		// var_dump($curr_time_data);
+		//var_dump($curr_time_data);
 		
 		$final_lap = false;
 		foreach ($curr_time_data as $k => $person_lap) {
@@ -424,7 +430,13 @@ function get_all_live_info_ass($total_data, $race_name, $init_time, $race_mins, 
 			// Pos Name             LastLap Lap# RaceTime FastLap\N
 			// 123 1234567890123456 1234567 1234 12345678 1234567\N
 			
-			//echo var_dump($person_lap);
+			echo var_dump($person_lap);
+			
+			
+
+			$this_driver_name = make_string_length($person_lap['driver_name'], 16, "name");
+			$this_lap_i = make_string_length($person_lap['lap_i'] + 1, 4);
+			$this_laptime = make_string_length($person_lap['laptime'], 7);
 			
 			
 			
@@ -432,23 +444,27 @@ function get_all_live_info_ass($total_data, $race_name, $init_time, $race_mins, 
 				$final_lap = true;
 				
 				$this_pos = make_string_length($person_lap['position'], 3);
-				$this_driver_name = make_string_length($person_lap['driver_name'], 16, "name");
-				$this_lap_i = make_string_length($person_lap['lap_i'] + 1, 4);
-				$this_laptime = make_string_length($person_lap['laptime'], 7);
 				$this_race_time = make_string_length($person_lap['race_time'], 8);
 				$this_fast_lap = make_string_length($person_lap['fast_lap'], 7);
 
 				$sub_string .= "{$this_pos} {$this_driver_name} {$this_lap_i} {$this_laptime} {$this_race_time} {$this_fast_lap}\N";
+				
+				if ($curr_data["car_num"] == $person_lap["car_num"]) {
+					$sub_string_0 .= "_\N";
+				} else {
+					$sub_string_0 .= "{$this_pos} {$this_driver_name} {$this_lap_i} {$this_laptime} {$this_race_time} {$this_fast_lap}\N";
+				}
 			} else {
 				$this_pos = make_string_length($k + 1, 3);
-				$this_driver_name = make_string_length($person_lap['driver_name'], 16, "name");
-				$this_lap_i = make_string_length($person_lap['lap_i'] + 1, 4);
-				$this_laptime = make_string_length($person_lap['laptime'], 7);
-				
 				$sub_string .= "{$this_pos} {$this_driver_name} {$this_lap_i} {$this_laptime}\N";
+				
+				if ($curr_data["car_num"] == $person_lap["car_num"]) {
+					$sub_string_0 .= "_\N";
+				} else {
+					$sub_string_0 .= "{$this_pos} {$this_driver_name} {$this_lap_i} {$this_laptime}\N";
+				}
 			}
-			
-			
+
 		}
 		if ($final_lap) {
 			$header_string = "Pos Name             Lap# RaceTime LastLap FastLap\N";
@@ -457,11 +473,13 @@ function get_all_live_info_ass($total_data, $race_name, $init_time, $race_mins, 
 		}
 		
 		$sub_string = $header_string . $sub_string;
+		$sub_string_0 = $header_string . $sub_string_0;
 		
 		if ($end_time == "") {
-			$end_time = get_time($init_time + $curr_data["curr_time"] + 5);
+			$end_time = get_time($init_time + $curr_data["curr_time"] + 3);
 		}
-		$ass_output .= "Dialogue: 0,{$start_time},{$end_time},DefaultVCD,NTP,0,0,0,,{{$tags}}{$sub_string}\n";
+		$ass_output .= "Dialogue: 0,{$start_time},{$mid_time},DefaultVCD,NTP,0,0,0,,{{$tags}}{$sub_string_0}\n";
+		$ass_output .= "Dialogue: 0,{$mid_time},{$end_time},DefaultVCD,NTP,0,0,0,,{{$tags}}{$sub_string}\n";
 
 	}
 	

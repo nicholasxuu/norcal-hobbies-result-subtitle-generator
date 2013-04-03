@@ -7,12 +7,12 @@ require_once("result_analyzer.php");
  * subtitle creation
  */
 
-$race_name = "4x4 Short Course Open A Main                                  Round# 3, Race# 9";
+$race_name = "2wd Buggy 17.5 A Main                                         Round# 3, Race# 5";
 $racer_number = 7;
-$init_time = 5.6;
+$init_time = 1.6;
 $video_len = "0:05:25.0";
 $race_minutes = 5;
-$output_file_name = "C:\\Users\\Nicholas\\Videos\\RC\\20130327-Others-4wdSC-Expert-MAH00250.ass";
+$output_file_name = "C:\\Users\\Nicholas\\Videos\\RC\\20130327-Others-17.5TBuggy-EX-MAH00248.ass";
 $input = $sample_input_6;
 
 $ass_format = "
@@ -36,7 +36,7 @@ YCbCr Matrix: TV.601
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: DefaultVCD,Andale Mono,15,&H00B4FCFC,&H00B4FCFC,&H01000008,&H80000008,-1,0,0,0,100,100,0,0,1,1,0,9,30,30,30,0
+Style: DefaultVCD,Andale Mono,8,&H00B4FCFC,&H00B4FCFC,&H01000008,&H80000008,-1,0,0,0,100,100,0,0,1,1,0,9,5,5,30,0
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
