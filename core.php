@@ -4,7 +4,10 @@
  * for shared functions
  **/
 
-
+function get_input_file_content($filename) {
+	$input = file_get_contents($filename);
+	return $input;
+}
  
 // get array of car# based on driver section's headerline.
 function get_driver_section_header_array($line) {
@@ -45,7 +48,7 @@ function get_total_data($inputArr) {
 	$driSectArr = array();
 	$lapSectArr = array();
 	$lapSectIndex = array(); 
-	$currRace = "";
+	$curr_race = "";
 	
 	foreach ($inputArr as $line)
 	{
@@ -56,8 +59,11 @@ function get_total_data($inputArr) {
 				// start new race
 				$section = 0;
 				
-				$currRace = trim($line);
-				$total_data[$currRace] = array();
+				$race_name_line_arr = preg_split("/[\s]{5,}/", $line);
+				
+				$curr_race = trim($race_name_line_arr[0]);
+				$total_data[$curr_race] = array();
+				
 			}
 			else if (preg_match('/.*Driver.*Car#.*Laps.*/', $line)) 
 			{
@@ -122,7 +128,7 @@ function get_total_data($inputArr) {
 				$currData["position_array"] = array();
 				$currData["finish_position"] = $finish_position;
 				$finish_position++;
-				$total_data[$currRace][$currData["Car#"]] = $currData;
+				$total_data[$curr_race][$currData["Car#"]] = $currData;
 			}
 			else if ($section === 2)
 			{
@@ -141,9 +147,9 @@ function get_total_data($inputArr) {
 						//echo var_dump($plap_section);
 						if (!empty($plap_section)) {
 							$plap_section = explode("/", $plap_section);
-							array_push($total_data[$currRace][$lapSectArr[$i-1]]["laptime_array"], $plap_section[1]); // fill lap time
+							array_push($total_data[$curr_race][$lapSectArr[$i-1]]["laptime_array"], $plap_section[1]); // fill lap time
 							
-							array_push($total_data[$currRace][$lapSectArr[$i-1]]["position_array"], $plap_section[0]); // fill position 
+							array_push($total_data[$curr_race][$lapSectArr[$i-1]]["position_array"], $plap_section[0]); // fill position 
 						}
 						
 					}
@@ -156,18 +162,18 @@ function get_total_data($inputArr) {
 				
 				// when new race starts, finish last race first
 				if ($type2input) { // if it's second type of input, need to remove un-needed lines of data
-					foreach ($total_data[$currRace] as $carNum => $whatever) {
+					foreach ($total_data[$curr_race] as $carNum => $whatever) {
 						$temp_laptime_array = array();
 						$temp_position_array = array();
-						//echo var_dump($total_data[$currRace][$carNum]["laptime_array"]);
-						for ($i = 0; $i < count($total_data[$currRace][$carNum]["laptime_array"]); $i += 2) {
-							array_push($temp_laptime_array, $total_data[$currRace][$carNum]["laptime_array"][$i]);
-							array_push($temp_position_array, $total_data[$currRace][$carNum]["position_array"][$i]);
+						//echo var_dump($total_data[$curr_race][$carNum]["laptime_array"]);
+						for ($i = 0; $i < count($total_data[$curr_race][$carNum]["laptime_array"]); $i += 2) {
+							array_push($temp_laptime_array, $total_data[$curr_race][$carNum]["laptime_array"][$i]);
+							array_push($temp_position_array, $total_data[$curr_race][$carNum]["position_array"][$i]);
 						}
 						//echo var_dump($temp_position_array);
 						//echo var_dump($temp_laptime_array);
-						$total_data[$currRace][$carNum]["laptime_array"] = $temp_laptime_array;
-						$total_data[$currRace][$carNum]["position_array"] = $temp_position_array;
+						$total_data[$curr_race][$carNum]["laptime_array"] = $temp_laptime_array;
+						$total_data[$curr_race][$carNum]["position_array"] = $temp_position_array;
 					}
 				}
 				
@@ -264,17 +270,20 @@ function cmp_curr_time($a, $b) {
 
 function cmp_pos($a, $b) {
 	//echo var_dump($a);
-	if (abs($a["lap_i"] - $b["lap_i"]) < 0.001) {
+	if (floor($a["lap_i"]) != floor($b["lap_i"])) {
 		return $a["lap_i"] < $b["lap_i"];
+	} else if (abs($a["lap_i"] - $b["lap_i"]) > 0.001) { // floor == floor, check residual here
+		return (fmod($a['lap_i'], 1) * floatval($a['next_laptime'])) < (fmod($b['lap_i'], 1) * floatval($b['next_laptime']));
 	} else if ($a["position"] != $b["position"]) {
 		return $a["position"] > $b["position"];
 	} else {
+		
 		if ($a['finish'] && !$b['finish']) {
-			return false;
-		} else if (!$a['finish'] && $b['finish']) {
 			return true;
+		} else if (!$a['finish'] && $b['finish']) {
+			return false;
 		} else {
-			return $a['race_time'] > $b['race_time'];
+			return $a['race_time'] < $b['race_time'];
 		}
 	}
 	// can be ignored
@@ -316,7 +325,6 @@ function get_dri_lap_i_curr_time($input_time, $total_data, $race_name, $car_num)
 		
 		// TODO: check edge value if logical
 		if ($curr_time - $input_time > 0.001) {
-
 			return $i - 1 + (($input_time - $prev_time) / $laptime);
 		}
 	}
@@ -330,9 +338,9 @@ function get_all_dri_lap_i_curr_time($input_time, $total_data, $race_name) {
 		$f = get_dri_lap_i_curr_time($input_time, $total_data, $race_name, $car_num);
 		$i = floor($f);
 		if ($i != -1 && !empty($car_data['laptime_array'])) {
-		
+			//echo var_dump($car_data);
 			// if last lap finished, load driver's result instead
-			if ($i == count($car_data['position_array']) - 1) {
+			if ($i == count($car_data['position_array']) - 1) { //finish result
 				$this_position = intval($car_data["finish_position"]);
 				$this_laps = intval($car_data["Laps"]) - 1; // index value, start from 0, will be corrected later
 				$this_race_time = $car_data['RaceTime'];
@@ -481,7 +489,7 @@ function get_all_live_info_ass($total_data, $race_name, $init_time, $race_mins, 
 			} else {
 				$this_pos = make_string_length($k + 1, 3);
 
-				$temp_sub_string = "{$this_pos} {$this_driver_name} {$this_laptime} {$this_behind} {$this_lap_i}\N";
+				$temp_sub_string = "{$this_pos} {$this_driver_name} {$this_laptime} {$this_lap_i} {$this_behind}\N";
 			}
 			
 			$sub_string .= $temp_sub_string;
@@ -530,7 +538,7 @@ function int_sec_to_str_time($input_time) {
 	return $time . $min . ":" . $sec;
 }
 
-function get_timer_ass($init_time, $race_min, $total_data, $race_name, $tags="\\an8\\fscx150\\fscy150") {
+function get_timer_ass($init_time, $race_min, $total_data, $race_name, $tags="\\an8\\fscx200\\fscy200") {
 	$ass_output = "";
 
 	// get longest race_time
