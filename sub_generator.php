@@ -36,7 +36,7 @@ YCbCr Matrix: TV.601
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: DefaultVCD,Andale Mono,8,&H00B4FCFC,&H00B4FCFC,&H01000008,&H80000008,-1,0,0,0,100,100,0,0,1,1,0,9,5,5,30,0
+Style: DefaultVCD,Andale Mono,8,&H00B4FCFC,&H00B4FCFC,&H01000008,&H80000008,-1,0,0,0,100,100,0,0,1,1,0,9,5,5,5,0
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
@@ -54,7 +54,7 @@ $ass_output .= get_all_live_info_ass($total_data, $race_name, $init_time, $race_
 //echo $ass_output;
 //echo var_dump($ass_output);
 
-$ass_output .= get_timer_ass($init_time, $race_minutes, $total_data, $race_name, "\\an8\\fscx150\\fscy150");
+$ass_output .= get_timer_ass($init_time, $race_minutes, $total_data, $race_name, "\\an8\\fscx150\\fscy150\\fnQuartz MS");
 
 if (1) {
 $fp = fopen($output_file_name, "w");

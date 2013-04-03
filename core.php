@@ -264,7 +264,7 @@ function cmp_curr_time($a, $b) {
 
 function cmp_pos($a, $b) {
 	//echo var_dump($a);
-	if ($a["lap_i"] != $b["lap_i"]) {
+	if (abs($a["lap_i"] - $b["lap_i"]) < 0.001) {
 		return $a["lap_i"] < $b["lap_i"];
 	} else if ($a["position"] != $b["position"]) {
 		return $a["position"] > $b["position"];
@@ -316,7 +316,8 @@ function get_dri_lap_i_curr_time($input_time, $total_data, $race_name, $car_num)
 		
 		// TODO: check edge value if logical
 		if ($curr_time - $input_time > 0.001) {
-			return $i-1;
+
+			return $i - 1 + (($input_time - $prev_time) / $laptime);
 		}
 	}
 	return $i-1;
@@ -326,22 +327,25 @@ function get_dri_lap_i_curr_time($input_time, $total_data, $race_name, $car_num)
 function get_all_dri_lap_i_curr_time($input_time, $total_data, $race_name) {
 	$retval = array();
 	foreach ($total_data[$race_name] as $car_num => $car_data) {
-		$i = get_dri_lap_i_curr_time($input_time, $total_data, $race_name, $car_num);
+		$f = get_dri_lap_i_curr_time($input_time, $total_data, $race_name, $car_num);
+		$i = floor($f);
 		if ($i != -1 && !empty($car_data['laptime_array'])) {
 		
 			// if last lap finished, load driver's result instead
 			if ($i == count($car_data['position_array']) - 1) {
 				$this_position = intval($car_data["finish_position"]);
-				$this_laps = intval($car_data["Laps"]) - 1;
+				$this_laps = intval($car_data["Laps"]) - 1; // index value, start from 0, will be corrected later
 				$this_race_time = $car_data['RaceTime'];
 				$this_fast_lap = $car_data['FastLap'];
 				$this_finish = true;
+				$this_behind = $car_data['Behind'];
 			} else {
 				$this_position = $car_data['position_array'][$i];
-				$this_laps = $i;
+				$this_laps = $f;
 				$this_race_time = "";
 				$this_fast_lap = "";
 				$this_finish = false;
+				$this_behind = "";
 			}
 		
 			//echo var_dump($car_data);
@@ -353,15 +357,30 @@ function get_all_dri_lap_i_curr_time($input_time, $total_data, $race_name) {
 				"driver_name" => $car_data['Driver'], // Name
 				"position" => $this_position, // Pos
 				"laptime" => $car_data['laptime_array'][$i], // LastLap
+				"next_laptime" => isset($car_data['laptime_array'][$i+1]) ? $car_data['laptime_array'][$i+1] : "0", // currentLap
 				"race_time" => $this_race_time, // RaceTime
 				"fast_lap" => $this_fast_lap, // FastLap
 				"finish" => $this_finish,
+				"behind" => $this_behind, // Behind
 			);
 			array_push($retval, $curr_obj);
 
 		}
 	}
 	usort($retval, "cmp_pos");
+	
+	// calculate behind
+	
+	
+	for ($i = 1; $i < count($retval); $i++) {
+		if (floor($retval[$i]['lap_i']) == floor($retval[$i-1]['lap_i']) && empty($retval[$i]['behind'])) {
+			$this_behind = (fmod($retval[$i-1]['lap_i'], 1) * floatval($retval[$i-1]['next_laptime'])) - (fmod($retval[$i]['lap_i'], 1) * floatval($retval[$i]['next_laptime']));
+			$retval[$i]['behind'] = substr(strval($this_behind), 0, 4);
+		}
+	}
+	
+	//echo var_dump($retval);
+	
 	return $retval;
 }
 
@@ -418,58 +437,65 @@ function get_all_live_info_ass($total_data, $race_name, $init_time, $race_mins, 
 		$mid_time = get_time($init_time + $curr_data["curr_time"] + min(0.1, $blink_diff)); // for time change user blink off
 		$end_time = (isset($total_curr_time[$i+1])) ? get_time($init_time + $total_curr_time[$i+1]["curr_time"]) : "";
 		
-		echo var_dump($curr_data);
+		//echo var_dump($curr_data);
 		$curr_time_data = get_all_dri_lap_i_curr_time($curr_data["curr_time"], $total_data, $race_name);
 		//var_dump($curr_time_data);
 		
+		// check if final lap session first
 		$final_lap = false;
+		for ($k = 0; $k < count($curr_time_data) && $final_lap == false; $k++) {
+			if ($curr_time_data[$k]['finish'] && $curr_data["curr_time"] > ($race_mins * 60)) {
+				$final_lap = true;
+			}
+		}
+		
+		// make up lap data
 		foreach ($curr_time_data as $k => $person_lap) {
-			// Pos Name             LastLap Lap#\N
-			// 123 1234567890123456 1234567 1234\N
+			// Pos Name               LastLap Lap# Behind\N
+			// 123 123456789012345678 1234567 1234 123456\N
 			
-			// Pos Name             LastLap Lap# RaceTime FastLap\N
-			// 123 1234567890123456 1234567 1234 12345678 1234567\N
+			// Pos Name               LastLap Lap# RaceTime Behind FastLap\N
+			// 123 123456789012345678 1234567 1234 12345678 123456 1234567\N
 			
-			echo var_dump($person_lap);
+			//echo var_dump($person_lap);
 			
 			
 
-			$this_driver_name = make_string_length($person_lap['driver_name'], 16, "name");
-			$this_lap_i = make_string_length($person_lap['lap_i'] + 1, 4);
+			$this_driver_name = make_string_length($person_lap['driver_name'], 18, "name");
+			$this_lap_i = make_string_length(floor($person_lap['lap_i']) + 1, 4);
 			$this_laptime = make_string_length($person_lap['laptime'], 7);
+			$this_behind = make_string_length($person_lap['behind'], 6);
 			
 			
-			
-			if ($person_lap['finish'] && $curr_data["curr_time"] > ($race_mins * 60)) {
-				$final_lap = true;
+			if ($final_lap) {
+				
 				
 				$this_pos = make_string_length($person_lap['position'], 3);
 				$this_race_time = make_string_length($person_lap['race_time'], 8);
 				$this_fast_lap = make_string_length($person_lap['fast_lap'], 7);
-
-				$sub_string .= "{$this_pos} {$this_driver_name} {$this_lap_i} {$this_laptime} {$this_race_time} {$this_fast_lap}\N";
 				
-				if ($curr_data["car_num"] == $person_lap["car_num"]) {
-					$sub_string_0 .= "_\N";
-				} else {
-					$sub_string_0 .= "{$this_pos} {$this_driver_name} {$this_lap_i} {$this_laptime} {$this_race_time} {$this_fast_lap}\N";
-				}
+
+				$temp_sub_string = "{$this_pos} {$this_driver_name} {$this_laptime} {$this_lap_i} {$this_race_time} {$this_behind} {$this_fast_lap}\N";
+				
+				
 			} else {
 				$this_pos = make_string_length($k + 1, 3);
-				$sub_string .= "{$this_pos} {$this_driver_name} {$this_lap_i} {$this_laptime}\N";
-				
-				if ($curr_data["car_num"] == $person_lap["car_num"]) {
-					$sub_string_0 .= "_\N";
-				} else {
-					$sub_string_0 .= "{$this_pos} {$this_driver_name} {$this_lap_i} {$this_laptime}\N";
-				}
+
+				$temp_sub_string = "{$this_pos} {$this_driver_name} {$this_laptime} {$this_behind} {$this_lap_i}\N";
+			}
+			
+			$sub_string .= $temp_sub_string;
+			if ($curr_data["car_num"] == $person_lap["car_num"]) { // if it's the car crossing the link, give only this car blink effect
+				$sub_string_0 .= "_\N";
+			} else {
+				$sub_string_0 .= $temp_sub_string;
 			}
 
 		}
 		if ($final_lap) {
-			$header_string = "Pos Name             Lap# RaceTime LastLap FastLap\N";
+			$header_string = "Pos Name               LastLap Lap# RaceTime Behind FastLap\N";
 		} else {
-			$header_string = "Pos Name             Lap# LastLap\N";
+			$header_string = "Pos Name               LastLap Lap# Behind\N";
 		}
 		
 		$sub_string = $header_string . $sub_string;
@@ -478,8 +504,8 @@ function get_all_live_info_ass($total_data, $race_name, $init_time, $race_mins, 
 		if ($end_time == "") {
 			$end_time = get_time($init_time + $curr_data["curr_time"] + 3);
 		}
-		$ass_output .= "Dialogue: 0,{$start_time},{$mid_time},DefaultVCD,NTP,0,0,0,,{{$tags}}{$sub_string_0}\n";
-		$ass_output .= "Dialogue: 0,{$mid_time},{$end_time},DefaultVCD,NTP,0,0,0,,{{$tags}}{$sub_string}\n";
+		$ass_output .= "Dialogue: 0,{$start_time},{$mid_time},DefaultVCD,NTP,0,0,30,,{{$tags}}{$sub_string_0}\n";
+		$ass_output .= "Dialogue: 0,{$mid_time},{$end_time},DefaultVCD,NTP,0,0,30,,{{$tags}}{$sub_string}\n";
 
 	}
 	
@@ -523,11 +549,16 @@ function get_timer_ass($init_time, $race_min, $total_data, $race_name, $tags="\\
 	
 	for ($i = 0; $i < $max_time; $i++) {
 		$curr_time = int_sec_to_str_time($race_time - $i);
+		if ($race_time - $i <= 0) {
+			$color_code = "\\c&H0000FF&";
+		} else {
+			$color_code = "\\c&H00FF00&";
+		}
 		//echo var_dump($curr_time);
 		
 		$start_time = get_time($init_time + $i);
 		$end_time = get_time($init_time + $i + 1);
-		$ass_output .= "Dialogue: 0,{$start_time},{$end_time},DefaultVCD,NTP,0,0,0,,{{$tags}}{$curr_time}\n";
+		$ass_output .= "Dialogue: 0,{$start_time},{$end_time},DefaultVCD,NTP,0,0,10,,{{$color_code}{$tags}}{$curr_time}\n";
 	}
 	//echo var_dump($ass_output);
 	return $ass_output;
