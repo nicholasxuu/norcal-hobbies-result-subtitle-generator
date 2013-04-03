@@ -7,10 +7,12 @@ require_once("result_analyzer.php");
  * subtitle creation
  */
 
-$race_name = "2wd Buggy 17.5 A Main                                         Round# 3, Race# 5";
+$race_name = "4x4 Short Course Open A Main                                  Round# 3, Race# 9";
 $racer_number = 7;
-$init_time = 1.9;
-$output_file_name = "C:\\Users\\Nicholas\\Videos\\RC\\20130327-Others-17.5TBuggy-EX-MAH00248.ass";
+$init_time = 5.6;
+$video_len = "0:05:25.0";
+$race_minutes = 5;
+$output_file_name = "C:\\Users\\Nicholas\\Videos\\RC\\20130327-Others-4wdSC-Expert-MAH00250.ass";
 $input = $sample_input_6;
 
 $ass_format = "
@@ -34,7 +36,7 @@ YCbCr Matrix: TV.601
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: DefaultVCD,Arial,39,&H00B4FCFC,&H00B4FCFC,&H01000008,&H80000008,-1,0,0,0,100,100,0,0,1,1,0,9,30,30,30,0
+Style: DefaultVCD,Andale Mono,15,&H00B4FCFC,&H00B4FCFC,&H01000008,&H80000008,-1,0,0,0,100,100,0,0,1,1,0,9,30,30,30,0
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
@@ -42,13 +44,17 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 
 $total_data = result_analyzer($input);
 //echo var_dump($total_data);
-//$ass_output = get_personal_ass_content($total_data, $race_name, $racer_number, $init_time, $ass_format);
 
-$ass_output = get_overall_ass_content($total_data, $race_name, $init_time, $ass_format, "{\an7}");
+$ass_output = $ass_format;
+
+//$ass_output = get_personal_ass($total_data, $race_name, $racer_number, $init_time, $ass_format);
+
+
+$ass_output .= get_all_live_info_ass($total_data, $race_name, $init_time, $race_minutes, "\\an7");
 //echo $ass_output;
 //echo var_dump($ass_output);
 
-$ass_output = add_timer_ass($ass_output, 1.9, 5, $total_data, $race_name);
+$ass_output .= get_timer_ass($init_time, $race_minutes, $total_data, $race_name, "\\an8\\fscx150\\fscy150");
 
 if (1) {
 $fp = fopen($output_file_name, "w");
