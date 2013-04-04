@@ -8,11 +8,11 @@ require_once("lib/core.php");
  * setup section start
  */
 
-$filename = ".\\data\\20130327.txt";
-$subtitle_type = "all"; // all - all racer's data; personal - personal lap data
-$race_name = "2wd Buggy 17.5 A Main";
-$output_filename = "C:\\Users\\Nicholas\\Videos\\RC\\20130327-Others-17.5TBuggy-EX-MAH00248.ass";
-$video_race_start_time = 1.6;
+$filename = ".\\data\\20130404.txt";
+//$subtitle_type = "all"; // all - all racer's data; personal - personal lap data
+$race_name = "4wd Buggy Open A Main";
+$output_filename = "C:\\Users\\Nicholas\\Videos\\20130403-{$race_name}.ass";
+$video_race_start_time = 3;
 $race_length = 5; // in minutes
 
 // set if subtitle_type = personal

@@ -344,9 +344,10 @@ function get_all_dri_lap_i_curr_time($input_time, $total_data, $race_name) {
 				$this_position = intval($car_data["finish_position"]);
 				$this_laps = intval($car_data["Laps"]) - 1; // index value, start from 0, will be corrected later
 				$this_race_time = $car_data['RaceTime'];
-				$this_fast_lap = $car_data['FastLap'];
+				$this_fast_lap = isset($car_data['FastLap']) ? $car_data['FastLap'] : "";
 				$this_finish = true;
-				$this_behind = $car_data['Behind'];
+				//echo var_dump($car_data);
+				$this_behind = isset($car_data['Behind']) ? $car_data['Behind'] : "";
 			} else {
 				$this_position = $car_data['position_array'][$i];
 				$this_laps = $f;
