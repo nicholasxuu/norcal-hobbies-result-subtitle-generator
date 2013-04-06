@@ -159,21 +159,24 @@ function get_total_data($inputArr) {
 			{
 				// these are not important data
 				//echo var_dump($line);
-				
+				//echo var_dump($lapSectArr);
 				// when new race starts, finish last race first
 				if ($type2input) { // if it's second type of input, need to remove un-needed lines of data
-					foreach ($total_data[$curr_race] as $carNum => $whatever) {
-						$temp_laptime_array = array();
-						$temp_position_array = array();
-						//echo var_dump($total_data[$curr_race][$carNum]["laptime_array"]);
-						for ($i = 0; $i < count($total_data[$curr_race][$carNum]["laptime_array"]); $i += 2) {
-							array_push($temp_laptime_array, $total_data[$curr_race][$carNum]["laptime_array"][$i]);
-							array_push($temp_position_array, $total_data[$curr_race][$carNum]["position_array"][$i]);
+					foreach ($lapSectArr as $temp => $carNum) {
+						if (isset($total_data[$curr_race][$carNum])) {
+							$temp_laptime_array = array();
+							$temp_position_array = array();
+							//echo var_dump($total_data[$curr_race][$carNum]["laptime_array"]);
+							for ($i = 0; $i < count($total_data[$curr_race][$carNum]["laptime_array"]); $i += 2) {
+								//echo var_dump($carNum);
+								array_push($temp_laptime_array, $total_data[$curr_race][$carNum]["laptime_array"][$i]);
+								array_push($temp_position_array, $total_data[$curr_race][$carNum]["position_array"][$i]);
+							}
+							//echo var_dump($temp_position_array);
+							//echo var_dump($temp_laptime_array);
+							$total_data[$curr_race][$carNum]["laptime_array"] = $temp_laptime_array;
+							$total_data[$curr_race][$carNum]["position_array"] = $temp_position_array;
 						}
-						//echo var_dump($temp_position_array);
-						//echo var_dump($temp_laptime_array);
-						$total_data[$curr_race][$carNum]["laptime_array"] = $temp_laptime_array;
-						$total_data[$curr_race][$carNum]["position_array"] = $temp_position_array;
 					}
 				}
 				
