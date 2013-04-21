@@ -526,6 +526,13 @@ function get_all_live_info_ass($total_data, $race_name, $init_time, $race_mins, 
 
 // limited to minumte:sec.ignored
 function str_time_to_int_sec($time) {
+	//echo var_dump($time);
+	if (strpos($time, ":") == false) {
+		$time = "0:" . $time;
+	}
+	if (strpos($time, ".") == false) {
+		$time = $time . ".0";
+	} 
 	$t1 = explode(":", $time);
 	$t2 = explode(".", $t1[1]);
 	return intval($t1[0]) * 60 + intval($t2[0]) + 1;
@@ -549,12 +556,13 @@ function get_timer_ass($init_time, $race_min, $total_data, $race_name, $tags="\\
 	$max_rt = "";
 	foreach ($total_data[$race_name] as $i => $c_data) {
 		//echo var_dump($c_data);
-		if (isset($c_data['RaceTime']) && $c_data['RaceTime'] > $max_rt) {
+		if (isset($c_data['RaceTime']) && str_time_to_int_sec($c_data['RaceTime']) > str_time_to_int_sec($max_rt)) {
 			$max_rt = $c_data['RaceTime'];
 		}
 	}
 	//echo var_dump($max_rt);
 	$max_time = str_time_to_int_sec($max_rt);
+	echo var_dump($max_time);
 	
 	$race_time = $race_min * 60;
 	
