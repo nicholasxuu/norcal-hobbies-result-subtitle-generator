@@ -466,8 +466,8 @@ function get_all_live_info_ass($total_data, $race_name, $init_time, $race_mins, 
 			// Pos Name               LastLap Lap# Behind\N
 			// 123 123456789012345678 1234567 1234 123456\N
 			
-			// Pos Name               LastLap Lap# RaceTime Behind FastLap\N
-			// 123 123456789012345678 1234567 1234 12345678 123456 1234567\N
+			// Pos Name               LastLap Lap# RaceTime  Behind FastLap\N
+			// 123 123456789012345678 1234567 1234 123456789 123456 1234567\N
 			
 			//echo var_dump($person_lap);
 			
@@ -483,7 +483,7 @@ function get_all_live_info_ass($total_data, $race_name, $init_time, $race_mins, 
 				
 				
 				$this_pos = make_string_length($person_lap['position'], 3);
-				$this_race_time = make_string_length($person_lap['race_time'], 8);
+				$this_race_time = make_string_length($person_lap['race_time'], 9);
 				$this_fast_lap = make_string_length($person_lap['fast_lap'], 7);
 				
 
@@ -505,7 +505,7 @@ function get_all_live_info_ass($total_data, $race_name, $init_time, $race_mins, 
 
 		}
 		if ($final_lap) {
-			$header_string = "Pos Name               LastLap Lap# RaceTime Behind FastLap\N";
+			$header_string = "Pos Name               LastLap Lap# RaceTime  Behind FastLap\N";
 		} else {
 			$header_string = "Pos Name               LastLap Lap# Behind\N";
 		}
@@ -516,8 +516,8 @@ function get_all_live_info_ass($total_data, $race_name, $init_time, $race_mins, 
 		if ($end_time == "") {
 			$end_time = get_time($init_time + $curr_data["curr_time"] + 3);
 		}
-		$ass_output .= "Dialogue: 0,{$start_time},{$mid_time},DefaultVCD,NTP,0,0,30,,{{$tags}}{$sub_string_0}\n";
-		$ass_output .= "Dialogue: 0,{$mid_time},{$end_time},DefaultVCD,NTP,0,0,30,,{{$tags}}{$sub_string}\n";
+		$ass_output .= "Dialogue: 0,{$start_time},{$mid_time},DefaultVCD,NTP,0,0,0,,{{$tags}}{$sub_string_0}\n";
+		$ass_output .= "Dialogue: 0,{$mid_time},{$end_time},DefaultVCD,NTP,0,0,0,,{{$tags}}{$sub_string}\n";
 
 	}
 	
