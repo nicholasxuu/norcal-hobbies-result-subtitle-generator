@@ -125,7 +125,7 @@ function get_total_data($inputArr) {
 				
 				$currData["Car#"] = str_replace("#", "", $currData["Car#"]);
 				$currData["laptime_array"] = array();
-				$currData["position_array"] = array();
+				//$currData["position_array"] = array();
 				$currData["finish_position"] = $finish_position;
 				$finish_position++;
 				$total_data[$curr_race][$currData["Car#"]] = $currData;
@@ -149,7 +149,7 @@ function get_total_data($inputArr) {
 							$plap_section = explode("/", $plap_section);
 							array_push($total_data[$curr_race][$lapSectArr[$i-1]]["laptime_array"], $plap_section[1]); // fill lap time
 							
-							array_push($total_data[$curr_race][$lapSectArr[$i-1]]["position_array"], $plap_section[0]); // fill position 
+							//array_push($total_data[$curr_race][$lapSectArr[$i-1]]["position_array"], $plap_section[0]); // fill position 
 						}
 						
 					}
@@ -165,17 +165,17 @@ function get_total_data($inputArr) {
 					foreach ($lapSectArr as $temp => $carNum) {
 						if (isset($total_data[$curr_race][$carNum])) {
 							$temp_laptime_array = array();
-							$temp_position_array = array();
+							//$temp_position_array = array();
 							//echo var_dump($total_data[$curr_race][$carNum]["laptime_array"]);
 							for ($i = 0; $i < count($total_data[$curr_race][$carNum]["laptime_array"]); $i += 2) {
 								//echo var_dump($carNum);
 								array_push($temp_laptime_array, $total_data[$curr_race][$carNum]["laptime_array"][$i]);
-								array_push($temp_position_array, $total_data[$curr_race][$carNum]["position_array"][$i]);
+								//array_push($temp_position_array, $total_data[$curr_race][$carNum]["position_array"][$i]);
 							}
 							//echo var_dump($temp_position_array);
 							//echo var_dump($temp_laptime_array);
 							$total_data[$curr_race][$carNum]["laptime_array"] = $temp_laptime_array;
-							$total_data[$curr_race][$carNum]["position_array"] = $temp_position_array;
+							//$total_data[$curr_race][$carNum]["position_array"] = $temp_position_array;
 						}
 					}
 				}
@@ -188,6 +188,8 @@ function get_total_data($inputArr) {
 	return $total_data;
 
 }
+
+
 
 // get formatted time for ass subtitle
 // input time float in second, output string of time
@@ -343,7 +345,7 @@ function get_all_dri_lap_i_curr_time($input_time, $total_data, $race_name) {
 		if ($i != -1 && !empty($car_data['laptime_array'])) {
 			//echo var_dump($car_data);
 			// if last lap finished, load driver's result instead
-			if ($i == count($car_data['position_array']) - 1) { //finish result
+			if ($i == count($car_data['laptime_array']) - 1) { //finish result
 				$this_position = intval($car_data["finish_position"]);
 				$this_laps = intval($car_data["Laps"]) - 1; // index value, start from 0, will be corrected later
 				$this_race_time = $car_data['RaceTime'];
@@ -352,7 +354,7 @@ function get_all_dri_lap_i_curr_time($input_time, $total_data, $race_name) {
 				//echo var_dump($car_data);
 				$this_behind = isset($car_data['Behind']) ? $car_data['Behind'] : "";
 			} else {
-				$this_position = $car_data['position_array'][$i];
+				$this_position = intval($car_data["finish_position"]);
 				$this_laps = $f;
 				$this_race_time = "";
 				$this_fast_lap = "";
@@ -562,10 +564,10 @@ function get_timer_ass($init_time, $race_min, $total_data, $race_name, $tags="\\
 	}
 	//echo var_dump($max_rt);
 	$max_time = str_time_to_int_sec($max_rt);
-	echo var_dump($max_time);
+	echo var_dump("---".$max_time);
 	
 	$race_time = $race_min * 60;
-	
+	echo var_dump($race_time);
 	
 	for ($i = 0; $i < $max_time; $i++) {
 		$curr_time = int_sec_to_str_time($race_time - $i);

@@ -45,6 +45,7 @@ function sub_generator($total_data, $race_name, $init_time, $race_minutes, $outp
 	//echo $ass_output;
 	//echo var_dump($ass_output);
 
+	echo var_dump(get_timer_ass($init_time, $race_minutes, $total_data, $race_name, "\\an8\\fscx200\\fscy200\\fnQuartz MS"));
 	$ass_output .= get_timer_ass($init_time, $race_minutes, $total_data, $race_name, "\\an8\\fscx200\\fscy200\\fnQuartz MS");
 
 	if (1) {
