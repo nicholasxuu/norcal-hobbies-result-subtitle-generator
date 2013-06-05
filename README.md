@@ -4,8 +4,13 @@ norcal-hobbies-result-subtitle-generator
 a PHP script to generate subtitle for the race info directly from the result sheet.
 
 
+Video Tutorial:
+https://www.youtube.com/watch?v=JyQdFskG1wI
+
+
 Setup a few variables in main.php, and run the script, you will get a .ass subtitle file generated.
 You may then use video editor (i.e. avidemux with subtitle filter) to embed the subtitle into the video. 
+
 
 Tips:
 1. to sync subtitle with video well:
