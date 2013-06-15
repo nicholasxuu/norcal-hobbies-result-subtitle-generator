@@ -36,6 +36,10 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
  
 function sub_generator($total_data, $race_name, $init_time, $race_minutes, $output_filename) {
 	global $default_ass_format;
+	
+	set_std_dev($total_data, $race_name);
+	
+	
 	$ass_output = $default_ass_format;
 
 	//$ass_output = get_personal_ass($total_data, $race_name, $racer_number, $init_time, $ass_format);
@@ -45,7 +49,7 @@ function sub_generator($total_data, $race_name, $init_time, $race_minutes, $outp
 	//echo $ass_output;
 	//echo var_dump($ass_output);
 
-	echo var_dump(get_timer_ass($init_time, $race_minutes, $total_data, $race_name, "\\an8\\fscx200\\fscy200\\fnQuartz MS"));
+	//echo var_dump(get_timer_ass($init_time, $race_minutes, $total_data, $race_name, "\\an8\\fscx200\\fscy200\\fnQuartz MS"));
 	$ass_output .= get_timer_ass($init_time, $race_minutes, $total_data, $race_name, "\\an8\\fscx200\\fscy200\\fnQuartz MS");
 
 	if (1) {

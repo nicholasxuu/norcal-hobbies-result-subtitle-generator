@@ -353,6 +353,7 @@ function get_all_dri_lap_i_curr_time($input_time, $total_data, $race_name) {
 				$this_finish = true;
 				//echo var_dump($car_data);
 				$this_behind = isset($car_data['Behind']) ? $car_data['Behind'] : "";
+				$this_consistency = isset($car_data['consistency']) ? $car_data['consistency'] : "";
 			} else {
 				$this_position = intval($car_data["finish_position"]);
 				$this_laps = $f;
@@ -360,6 +361,7 @@ function get_all_dri_lap_i_curr_time($input_time, $total_data, $race_name) {
 				$this_fast_lap = "";
 				$this_finish = false;
 				$this_behind = "";
+				$this_consistency = "";
 			}
 		
 			//echo var_dump($car_data);
@@ -376,6 +378,7 @@ function get_all_dri_lap_i_curr_time($input_time, $total_data, $race_name) {
 				"fast_lap" => $this_fast_lap, // FastLap
 				"finish" => $this_finish,
 				"behind" => $this_behind, // Behind
+				"consistency" => $this_consistency,
 			);
 			array_push($retval, $curr_obj);
 
@@ -436,6 +439,8 @@ function make_string_length($input, $length, $type="str") {
 
 function get_all_live_info_ass($total_data, $race_name, $init_time, $race_mins, $tags="\\an7") {
 	$ass_output = "";
+	$total_data = set_std_dev($total_data, $race_name);
+	echo var_dump($total_data[$race_name]);
 	
 	$total_curr_time = get_total_curr_time($total_data, $race_name);
 	//echo var_dump($total_data[$race_name]);
@@ -487,9 +492,11 @@ function get_all_live_info_ass($total_data, $race_name, $init_time, $race_mins, 
 				$this_pos = make_string_length($person_lap['position'], 3);
 				$this_race_time = make_string_length($person_lap['race_time'], 9);
 				$this_fast_lap = make_string_length($person_lap['fast_lap'], 7);
+				$this_consistency = make_string_length($person_lap['consistency'], 11);
+				//$this_consistency = "123456789012";
 				
 
-				$temp_sub_string = "{$this_pos} {$this_driver_name} {$this_laptime} {$this_lap_i} {$this_race_time} {$this_behind} {$this_fast_lap}\N";
+				$temp_sub_string = "{$this_pos} {$this_driver_name} {$this_laptime} {$this_lap_i} {$this_race_time} {$this_behind} {$this_fast_lap} {$this_consistency}\N";
 				
 				
 			} else {
@@ -507,7 +514,7 @@ function get_all_live_info_ass($total_data, $race_name, $init_time, $race_mins, 
 
 		}
 		if ($final_lap) {
-			$header_string = "Pos Name               LastLap Lap# RaceTime  Behind FastLap\N";
+			$header_string = "Pos Name               LastLap Lap# RaceTime  Behind FastLap Consistency\N";
 		} else {
 			$header_string = "Pos Name               LastLap Lap# Behind\N";
 		}
@@ -551,7 +558,7 @@ function int_sec_to_str_time($input_time) {
 	return $time . $min . ":" . $sec;
 }
 
-function get_timer_ass($init_time, $race_min, $total_data, $race_name, $tags="\\an8\\fscx200\\fscy200") {
+function get_timer_ass($init_time, $race_min, $total_data, $race_name, $tags="\\an9\\fscx200\\fscy200") {
 	$ass_output = "";
 
 	// get longest race_time
@@ -564,25 +571,64 @@ function get_timer_ass($init_time, $race_min, $total_data, $race_name, $tags="\\
 	}
 	//echo var_dump($max_rt);
 	$max_time = str_time_to_int_sec($max_rt);
-	echo var_dump("---".$max_time);
+	//echo var_dump("---".$max_time);
 	
 	$race_time = $race_min * 60;
-	echo var_dump($race_time);
+	//echo var_dump($race_time);
 	
 	for ($i = 0; $i < $max_time; $i++) {
 		$curr_time = int_sec_to_str_time($race_time - $i);
 		if ($race_time - $i <= 0) {
 			$color_code = "\\c&H0000FF&";
+			
 		} else {
 			$color_code = "\\c&H00FF00&";
+			
+			$start_time = get_time($init_time + $i);
+			$end_time = get_time($init_time + $i + 1);
+			$ass_output .= "Dialogue: 0,{$start_time},{$end_time},DefaultVCD,NTP,0,50,10,,{{$color_code}{$tags}}{$curr_time}\n";
 		}
 		//echo var_dump($curr_time);
 		
-		$start_time = get_time($init_time + $i);
-		$end_time = get_time($init_time + $i + 1);
-		$ass_output .= "Dialogue: 0,{$start_time},{$end_time},DefaultVCD,NTP,0,0,10,,{{$color_code}{$tags}}{$curr_time}\n";
+		
 	}
 	//echo var_dump($ass_output);
 	return $ass_output;
 }
 
+function get_average($arr) {
+	$sum = 0;
+	foreach ($arr as $laptime_str) {
+		$sum += floatval($laptime_str);
+	}
+	//echo var_dump($sum / count($arr));
+	return $sum / count($arr);
+}
+
+function set_std_dev($total_data, $race_name) {
+	foreach($total_data[$race_name] as $i => $c_data) {
+		//echo var_dump($c_data['laptime_array']);
+		
+		
+		
+		$average = get_average($c_data['laptime_array']);
+		
+		$sum = 0;
+		foreach ($c_data['laptime_array'] as $laptime_str) {
+			$sum += pow( (floatval($laptime_str) - $average) , 2);
+		}
+		$std_dev = sqrt($sum / count($c_data['laptime_array']));
+		
+		//echo var_dump($std_dev);
+		
+		$consistency = 100 - (floatval(intval(($std_dev/$average * 10000))) / 100);
+		
+		//echo var_dump($consistency);
+		$total_data[$race_name][$i]['consistency'] = strval($consistency) . "%";
+		//echo var_dump("---------");
+		
+		//echo var_dump($total_data[$race_name][$i]['consistency']);
+	}
+	//echo var_dump($total_data[$race_name]);
+	return $total_data;
+}
