@@ -609,25 +609,28 @@ function set_std_dev($total_data, $race_name) {
 	foreach($total_data[$race_name] as $i => $c_data) {
 		//echo var_dump($c_data['laptime_array']);
 		
+		if (count($c_data['laptime_array']) > 0) {
 		
-		
-		$average = get_average($c_data['laptime_array']);
-		
-		$sum = 0;
-		foreach ($c_data['laptime_array'] as $laptime_str) {
-			$sum += pow( (floatval($laptime_str) - $average) , 2);
+			$average = get_average($c_data['laptime_array']);
+			
+			$sum = 0;
+			foreach ($c_data['laptime_array'] as $laptime_str) {
+				$sum += pow( (floatval($laptime_str) - $average) , 2);
+			}
+			$std_dev = sqrt($sum / count($c_data['laptime_array']));
+			
+			//echo var_dump($std_dev);
+			
+			$consistency = 100 - (floatval(intval(($std_dev/$average * 10000))) / 100);
+			
+			//echo var_dump($consistency);
+			$total_data[$race_name][$i]['consistency'] = strval($consistency) . "%";
+			//echo var_dump("---------");
+			
+			//echo var_dump($total_data[$race_name][$i]['consistency']);
+		} else {
+			$total_data[$race_name][$i]['consistency'] = "";
 		}
-		$std_dev = sqrt($sum / count($c_data['laptime_array']));
-		
-		//echo var_dump($std_dev);
-		
-		$consistency = 100 - (floatval(intval(($std_dev/$average * 10000))) / 100);
-		
-		//echo var_dump($consistency);
-		$total_data[$race_name][$i]['consistency'] = strval($consistency) . "%";
-		//echo var_dump("---------");
-		
-		//echo var_dump($total_data[$race_name][$i]['consistency']);
 	}
 	//echo var_dump($total_data[$race_name]);
 	return $total_data;

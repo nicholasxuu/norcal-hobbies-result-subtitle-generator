@@ -13,14 +13,14 @@ $race_type = "rc_racing";
 
 
 
-$date = "20130612";//
+$date = "20131002";//
 $filename = ".\\data\\{$date}.txt"; // race result's file name
-$race_name = "Rookie A Main"; //1-8 Buggy Electric A Main race wanted to be generated into output
+$race_name = "2wd Buggy 17.5 A Main"; //1-8 Buggy Electric A Main race wanted to be generated into output
 
-$car= "Others";//EB48
+$car= "TLR22";//EB48
 $output_filename = "C:\\Users\\Nicholas\\Videos\\rc_temp\\{$date}-{$car}-{$race_name}-.ass"; // output subtitle's file name
 $video_race_start_time = 3; // in seconds, time in video where the tone starts, i.e 3 seconds into the video the tone starts. (note: tone's long, so make sure it's right at the beginning of the tone, maybe 0.1s before the tone starts, otherwise the timing board may looks a bit un-synced.
-$race_length = 4; // in minutes
+$race_length = 5; // in minutes
 
 // set if subtitle_type = personal
 // $car_number = 0;
