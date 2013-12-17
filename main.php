@@ -13,14 +13,48 @@ $race_type = "rc_racing";
 
 
 
-$date = "20131002";//
+$date = "20131215";//
 $filename = ".\\data\\{$date}.txt"; // race result's file name
-$race_name = "2wd Buggy 17.5 A Main"; //1-8 Buggy Electric A Main race wanted to be generated into output
 
-$car= "TLR22";//EB48
-$output_filename = "C:\\Users\\Nicholas\\Videos\\rc_temp\\{$date}-{$car}-{$race_name}-.ass"; // output subtitle's file name
-$video_race_start_time = 3; // in seconds, time in video where the tone starts, i.e 3 seconds into the video the tone starts. (note: tone's long, so make sure it's right at the beginning of the tone, maybe 0.1s before the tone starts, otherwise the timing board may looks a bit un-synced.
-$race_length = 5; // in minutes
+
+/*
+$race_name = "17.5 2wd Short Course A Main"; 
+$car= "DESC210";
+$output_filename = "C:\\Users\\Nicholas\\Videos\\rc_temp\\{$date}-{$car}-{$race_name}-.ass"; 
+$video_race_start_time = 3; 
+$race_length = 5; 
+
+$race_name = "2wd Buggy 17.5 A Main"; 
+$car= "TLR22";
+$output_filename = "C:\\Users\\Nicholas\\Videos\\rc_temp\\{$date}-{$car}-{$race_name}-.ass"; 
+$video_race_start_time = 3; 
+$race_length = 5; 
+
+$race_name = "4wd Buggy Open A Main"; 
+$car= "DEX410V3";
+$output_filename = "C:\\Users\\Nicholas\\Videos\\rc_temp\\{$date}-{$car}-{$race_name}-.ass"; 
+$video_race_start_time = 3; 
+$race_length = 5; 
+
+$race_name = "2wd Short Course Open A Main"; 
+$car= "DESC210";
+$output_filename = "C:\\Users\\Nicholas\\Videos\\rc_temp\\{$date}-{$car}-{$race_name}-.ass"; 
+$video_race_start_time = 3; 
+$race_length = 5; 
+
+$race_name = "4x4 Short Course Open A Main"; 
+$car= "DESC410";
+$output_filename = "C:\\Users\\Nicholas\\Videos\\rc_temp\\{$date}-{$car}-{$race_name}-.ass"; 
+$video_race_start_time = 3; 
+$race_length = 5; 
+
+
+*/
+$race_name = "4wd Buggy Open A2 Main"; 
+$car= "DEX410V3";
+$output_filename = "C:\\Users\\Nicholas\\Videos\\rc_temp\\{$date}-{$car}-{$race_name}-.ass"; 
+$video_race_start_time = 3; 
+$race_length = 6; 
 
 // set if subtitle_type = personal
 // $car_number = 0;
@@ -48,7 +82,7 @@ $race_length = 45;
 $input = get_input_file_content($filename);
 $result_data = result_analyzer($input, $race_type);
 //echo var_dump($result_data);
-echo var_dump($result_data[$race_name][5]);
+//echo var_dump($result_data[$race_name][5]);
 
 
 sub_generator($result_data, $race_name, $video_race_start_time, $race_length, $output_filename);
