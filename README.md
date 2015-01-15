@@ -1,6 +1,11 @@
 norcal-hobbies-result-subtitle-generator
 ========================================
 
+***
+Project depreciated, new version can be found at https://github.com/nicholasxuu/RaceTimingSubGenerator
+New version has cleaner code (this concept starts from a 3 nights hack), better setup/sync method, and a user interface.
+***
+
 a PHP script to generate subtitle for the race info directly from the result sheet.
 
 
